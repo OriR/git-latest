@@ -1,0 +1,27 @@
+{
+  "name": "git-latest",
+  "version": "0.0.0",
+  "description": "Get the latest branches on git and check them out!",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "git-latest": "./bin/index.js"
+  },
+  "keywords": [
+    "git",
+    "branch",
+    "latest",
+    "recent",
+    "branches",
+    "checkout"
+  ],
+  "author": "Ori Riner",
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "1.2.2",
+    "yargs": "6.0.0"
+  },
+  "devDependencies": {}
+}
