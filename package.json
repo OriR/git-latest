@@ -1,13 +1,13 @@
 {
   "name": "git-latest",
   "version": "0.0.0",
-  "description": "Get the latest branches on git and check them out!",
-  "main": "bin/index.js",
+  "description": "Manage your latest git branches without a hassle!",
+  "main": "./cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ava"
   },
   "bin": {
-    "git-latest": "./bin/index.js"
+    "git-latest": "./cli.js"
   },
   "keywords": [
     "git",
@@ -17,11 +17,30 @@
     "branches",
     "checkout"
   ],
-  "author": "Ori Riner",
+  "author": {
+    "name": "Ori Riner",
+    "email": "oririner@gmail.com"
+  },
   "license": "MIT",
   "dependencies": {
     "inquirer": "1.2.2",
     "yargs": "6.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "ava": "0.16.0",
+    "proxyquire": "1.7.10",
+    "sinon": "^1.17.6"
+  },
+  "ava": {
+    "files": [
+      "tests/**/*.js"
+    ],
+    "source": [
+      "**/*.js",
+      "!tests/**/*.js"
+    ],
+    "concurrency": 5,
+    "failFast": true,
+    "powerAssert": true
+  }
 }

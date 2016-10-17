@@ -69,9 +69,10 @@
     if (next !== previous) {
       fs.readFile(latestFile, 'utf-8', (error, branches) => {
 
-        // In case we can't get the file - something bad happened, let's bail!
+        // In case we can't get the file - something bad happened.
+        // We assume there's no file and we'll create it at the end of this function with the latest branch.
         if (error) {
-          return;
+          branches = '';
         }
 
         const lines = branches.length === 0 ? [] : branches.split(os.EOL);

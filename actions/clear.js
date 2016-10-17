@@ -6,16 +6,7 @@ const constants = require('../utils/constants');
 const latestBranches = require('../utils/latestBranches');
 
 const handler = {
-  verifyLatestBranches(branches) {
-    if(branches.length === 0){
-      throw new Error(constants.messages.noLatestBranches);
-    }
-
-    return branches;
-  },
   getSelectedBranches(argv, branches) {
-
-    // Check if the user requested to --keep a number of branches and not manually select.
     if (argv.keep !== undefined && !isNaN(argv.keep)){
       argv.white = argv.w = false;
       return Promise.resolve({ selectedBranches: branches.slice(0, argv.keep), branches });
@@ -34,10 +25,7 @@ const handler = {
     });
   },
   getKeptBranches(argv, {selectedBranches, branches}) {
-    return branches.filter((item) => {
-      const isInSelectedBranches = selectedBranches.includes(item);
-      return argv.white ? !isInSelectedBranches : isInSelectedBranches;
-    });
+    return !argv.white ? selectedBranches : branches.filter((item) => !selectedBranches.includes(item));
   },
   writeKeptBranches(keptBranches) {
     return fs.writeFile(constants.latestPath, keptBranches.join(os.EOL));
@@ -48,11 +36,11 @@ const handler = {
     }
     else{
       latestBranches()
-      .then(this.verifyLatestBranches.bind(this))
+      .then(latestBranches.verify)
       .then(this.getSelectedBranches.bind(this, argv))
       .then(this.getKeptBranches.bind(this, argv))
       .then(this.writeKeptBranches.bind(this))
-      .catch((reason) => console.log(reason.message));
+      .catch((error) => console.log(error.message));
     }
   },
   command: 'clear [all] [white] [multiple] [keep]',

@@ -6,13 +6,9 @@ const constants = require('../utils/constants');
 const handler = {
   verifyInsideGitDirectory() {
     return fs.access(constants.gitPath, fs.constants.W_OK)
-    .then(() => true)
-    .catch(() => false)
-    .then((isGitDirectory) => {
-      if (!isGitDirectory) {
-        throw new Error(constants.messages.notAGitDirectory);
-      }
-    });
+      .catch(() => {
+        throw new Error(constants.messages.notAGitDirectory)
+      });
   },
   getCurrentPostCheckoutHook(argv) {
     return argv.force ?
@@ -21,6 +17,13 @@ const handler = {
         .then((postCheckout) => postCheckout)
         .catch(() => null);
   },
+  verifyCurrentPostCheckoutIsNode(postCheckout) {
+    if (postCheckout && !postCheckout.includes(constants.nodeShebang)) {
+      throw new Error(constants.messages.existingNonNodeScript);
+    }
+
+    return postCheckout;
+  },
   verifyNotInstalledGitLatest(postCheckout) {
     if(postCheckout && postCheckout.includes(constants.beginningInstallMessage)){
       throw new Error(constants.messages.alreadyInstalled);
@@ -28,15 +31,9 @@ const handler = {
 
     return postCheckout;
   },
-  createHookWriteHandler(argv, postCheckout) {
-    const append = postCheckout && !argv.force;
-
-    if (postCheckout && !postCheckout.includes(constants.nodeShebang)) {
-      throw new Error(constants.messages.existingNonNodeScript);
-    }
-
+  createHookWriteHandler(postCheckout) {
     return {
-      writeAction: append ? 'appendFile' : 'writeFile',
+      writeAction: postCheckout ? 'appendFile' : 'writeFile',
       setGitLatestPostCheckout(gitLatestPostCheckout) {
         this.gitLatestPostCheckout = gitLatestPostCheckout;
         return this;
@@ -46,7 +43,7 @@ const handler = {
         lines.unshift(constants.beginningInstallMessage);
         lines.push(constants.endingInstallMessage);
 
-        if (!append) {
+        if (!postCheckout) {
           lines.unshift(constants.nodeShebang);
         }
 
@@ -67,13 +64,14 @@ const handler = {
   handler(argv) {
     this.verifyInsideGitDirectory()
     .then(this.getCurrentPostCheckoutHook.bind(this, argv))
+    .then(this.verifyCurrentPostCheckoutIsNode.bind(this))
     .then(this.verifyNotInstalledGitLatest.bind(this))
     .then(this.createHookWriteHandler.bind(this, argv))
     .then(this.setGitLatestPostCheckoutHook.bind(this))
     .then(this.writeGitLatestPostCheckoutHook.bind(this))
     .then(this.clearLatestBranchesFile.bind(this))
     .then(() => console.log(constants.messages.successfulInstall))
-    .catch((error) => console.log(error.message.toString()));
+    .catch((error) => console.log(error.message));
   },
   command: 'install [force]',
   desc: 'Installs a post-checkout git hook.',
