@@ -7,15 +7,13 @@ const handler = {
   verifyInsideGitDirectory() {
     return fs.access(constants.gitPath, fs.constants.W_OK)
       .catch(() => {
-        throw new Error(constants.messages.notAGitDirectory)
+        throw new Error(constants.messages.notAGitDirectory);
       });
   },
   getCurrentPostCheckoutHook(argv) {
     return argv.force ?
       Promise.resolve(null) :
-      fs.readFile(constants.postCheckoutPath, 'utf-8')
-        .then((postCheckout) => postCheckout)
-        .catch(() => null);
+      fs.readFile(constants.postCheckoutPath, 'utf-8').catch(() => null);
   },
   verifyCurrentPostCheckoutIsNode(postCheckout) {
     if (postCheckout && !postCheckout.includes(constants.nodeShebang)) {
@@ -66,7 +64,7 @@ const handler = {
     .then(this.getCurrentPostCheckoutHook.bind(this, argv))
     .then(this.verifyCurrentPostCheckoutIsNode.bind(this))
     .then(this.verifyNotInstalledGitLatest.bind(this))
-    .then(this.createHookWriteHandler.bind(this, argv))
+    .then(this.createHookWriteHandler.bind(this))
     .then(this.setGitLatestPostCheckoutHook.bind(this))
     .then(this.writeGitLatestPostCheckoutHook.bind(this))
     .then(this.clearLatestBranchesFile.bind(this))
